@@ -1,3 +1,4 @@
+import { GuildMember } from 'discord.js';
 import { Node, Red } from 'node-red';
 import { Bot } from '../lib/Bot';
 import {
@@ -40,14 +41,20 @@ export = (RED: Red) => {
           .get(token)
           .then((bot: IBot) => {
             const guild = bot.guilds.resolve(serverId);
-            const guildMember = guild!!.members.resolve('639178210235514900');
-            if (guild) {
+            const guildMemberPromise = guild!!.members.fetch(
+              '639178210235514900',
+            );
+            guildMemberPromise.then((guildMember: GuildMember) => {
               msg.payload = Flatted.parse(Flatted.stringify(guildMember));
               node.send(msg);
-            } else {
-              msg.payload = 'NULL GUILD';
-              node.send(msg);
-            }
+            });
+            // if (guild) {
+            //   msg.payload = Flatted.parse(Flatted.stringify(guildMember));
+            //   node.send(msg);
+            // } else {
+            //   msg.payload = 'NULL GUILD';
+            //   node.send(msg);
+            // }
             // node.send(Flatted.parse(Flatted.stringify(guild.members.cache.get(userId))));
             // let isMod = 'false';
             // roleIds.forEach((role) => {

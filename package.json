@@ -9,8 +9,7 @@
   },
   "version": "2.1.0",
   "scripts": {
-    "build-original": "npm run copyHtml && npm run copyIcons && tsc ",
-    "build": "npm run copyHtml && npm run copyIcons",
+    "build": "npm run copyHtml && npm run copyIcons && tsc ",
     "copyHtml": "mkdir -p dist/nodes/ && cp -a src/nodes/*.html dist/nodes/",
     "copyIcons": "mkdir -p dist/nodes/icons && cp -a src/nodes/icons/. dist/nodes/icons",
     "lint": "tslint --project ./",
