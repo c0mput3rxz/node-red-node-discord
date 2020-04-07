@@ -1,4 +1,4 @@
-import { Message, Role } from 'discord.js';
+import { ClientEvents, Message, Role } from 'discord.js';
 import { Node, Red } from 'node-red';
 
 import { Bot } from '../lib/Bot';
@@ -38,8 +38,8 @@ export = (RED: Red) => {
           node.status({ fill: 'green', shape: 'dot', text: 'ready' });
 
           const registerCallback = (
-            event: string,
-            listener: (param: any) => void,
+            event: keyof ClientEvents,
+            listener: any,
           ) => {
             callbacks.push({ event, listener });
             bot.on(event, listener);
@@ -59,20 +59,20 @@ export = (RED: Red) => {
             if (message.author !== bot.user && processingAllowed) {
               const msgid = RED.util.generateId();
               const msg = { _msgid: msgid } as IFromDiscordMsg;
-              const attachments = message.attachments;
-              if (attachments) {
-                msg.attachments = attachments.array().map((item) => ({
-                  filename: item.filename,
-                  href: item.url,
-                }));
-              }
+              // const attachments = message.attachments;
+              // if (attachments) {
+              //   msg.attachments = attachments.array().map((item) => ({
+              //     filename: item.name,
+              //     href: item.url,
+              //   }));
+              // }
               const mentionResolver = new Mentions(message.content, bot);
               msg.payload = mentionResolver.formattedInputMessage;
               msg.channel = message.channel;
               msg.author = message.author;
               msg.member = message.member;
               msg.memberRoleNames = message.member
-                ? message.member.roles.array().map((item: Role) => {
+                ? message.member.roles.cache.array().map((item: Role) => {
                     return item.name;
                   })
                 : null;

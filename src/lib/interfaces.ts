@@ -2,16 +2,16 @@ import { Node, NodeProperties } from 'node-red';
 import { Stream } from 'stream';
 
 import {
-  Attachment,
   Client,
+  ColorResolvable,
   DMChannel,
-  GroupDMChannel,
   GuildMember,
   Message,
+  NewsChannel,
+  Permissions,
+  PermissionString,
   TextChannel,
   User,
-  PermissionString,
-  ColorResolvable,
 } from 'discord.js';
 
 export interface IConnectConfig extends Node {
@@ -31,6 +31,12 @@ export interface ISendMessageProps extends NodeProperties {
   channel: string;
 }
 
+export interface IGetMemberRoleConfig extends Node {
+  token: string;
+  serverId: string;
+  roleId: string;
+}
+
 export interface IBot extends Client {
   numReferences?: number;
 }
@@ -39,17 +45,21 @@ export interface ICallback {
   event: string;
   listener: (param: any) => void;
 }
-export type NamedChannel = TextChannel | GroupDMChannel;
+export type NamedChannel = TextChannel;
 
 export interface IFromDiscordMsg {
   _msgid: string;
   payload: string;
-  channel: NamedChannel | DMChannel;
+  channel: NamedChannel | DMChannel | NewsChannel;
   author: User;
-  member: GuildMember;
+  member: GuildMember | null;
   memberRoleNames: string[] | null;
   attachments?: IFile[];
   rawData?: Message;
+}
+
+export interface IMessage {
+  payload: string;
 }
 
 export interface IFile {
@@ -91,7 +101,7 @@ export interface IRichEmbedArgs {
     url?: string;
   };
 
-  attachments?: Attachment[];
+  attachments?: any;
   field?: IRichEmbedField;
   fields?: IRichEmbedField[];
 }
@@ -115,13 +125,13 @@ export interface ITextChannelMetric {
 export interface IMetricRoleItem {
   id: string;
   name: string;
-  permissions: number;
+  permissions: Readonly<Permissions>;
 }
 
 export interface IMetricMemberItem {
   id: string;
   username: string;
-  joinedDate: Date;
+  joinedDate: Date | null;
   permissions: PermissionString[];
   roles: IMetricRoleItem[];
 }

@@ -20,7 +20,7 @@ export class MemberMonitor {
   // }
 
   private get textChannels() {
-    return this.channels.filter(
+    return this.channels.cache.filter(
       (channel) => channel.type === 'text',
     ) as Collection<string, TextChannel>;
   }
@@ -44,7 +44,7 @@ export class MemberMonitor {
           username: member.user.username,
         };
         const { roles } = member;
-        roles.forEach((role) => {
+        roles.cache.forEach((role) => {
           const roleMetric: IMetricRoleItem = {
             id: role.id,
             name: role.name,
@@ -54,7 +54,7 @@ export class MemberMonitor {
         });
         channelMetric.members.push(memberMetric);
       });
-      const category = channel.parent.name;
+      const category = channel.parent!.name;
       if (result[category]) {
         result[category].push(channelMetric);
       } else {
