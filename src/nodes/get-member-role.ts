@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import { GuildMember, Role } from 'discord.js';
 import { Node, Red } from 'node-red';
 import { Bot } from '../lib/Bot';
 import {
@@ -34,18 +34,33 @@ export = (RED: Red) => {
     // @ts-ignore -> send is never used
     this.on('input', (msg: IMessage, send, done) => {
       node.status({ fill: 'green', shape: 'dot', text: 'ready' });
+      // tslint:disable-next-line:no-console
+      console.log('TEST', token);
       // @ts-ignore
       const userId = msg.payload;
       if (token) {
         botInstance
           .get(token)
           .then((bot: IBot) => {
+            // tslint:disable-next-line:no-console
+            console.log('Bot', bot);
             const guild = bot.guilds.resolve(serverId);
             const guildMemberPromise = guild!!.members.fetch(
               '639178210235514900',
             );
             guildMemberPromise.then((guildMember: GuildMember) => {
-              msg.payload = Flatted.parse(Flatted.stringify(guildMember));
+              // tslint:disable-next-line:no-console
+              console.log('Guild Member', guildMember);
+              // tslint:disable-next-line:no-console
+              console.log(
+                'Guild Member ROLES',
+                guildMember.roles.cache.values(),
+              );
+              msg.payload = Flatted.parse(
+                Flatted.stringify(
+                  guildMember.roles.cache.get('696073400338350081') as Role,
+                ),
+              );
               node.send(msg);
             });
             // if (guild) {
