@@ -1,14 +1,13 @@
 import { GuildMember, Role } from 'discord.js';
+import Flatted = require('flatted');
 import { Node, Red } from 'node-red';
 import { Bot } from '../lib/Bot';
 import {
   IBot,
   IConnectConfig,
   IGetMemberRoleConfig,
-  IMessage,
+  IMessageWithUserId,
 } from '../lib/interfaces';
-// @ts-ignore
-import Flatted = require('flatted');
 
 export = (RED: Red) => {
   RED.nodes.registerType('discord-get-member-role', function(
@@ -32,55 +31,35 @@ export = (RED: Red) => {
     const serverId = props.serverId;
 
     // @ts-ignore -> send is never used
-    this.on('input', (msg: IMessage, send, done) => {
+    this.on('input', (msg: IMessageWithUserId, send, done) => {
       node.status({ fill: 'green', shape: 'dot', text: 'ready' });
-      // tslint:disable-next-line:no-console
-      console.log('TEST', token);
-      // @ts-ignore
-      const userId = msg.payload;
+      const userId = msg.topic;
+
       if (token) {
         botInstance
           .get(token)
           .then((bot: IBot) => {
-            // tslint:disable-next-line:no-console
-            console.log('Bot', bot);
             const guild = bot.guilds.resolve(serverId);
-            const guildMemberPromise = guild!!.members.fetch(
-              '639178210235514900',
-            );
+            const guildMemberPromise = guild!!.members.fetch(userId);
             guildMemberPromise.then((guildMember: GuildMember) => {
-              // tslint:disable-next-line:no-console
-              console.log('Guild Member', guildMember);
+              let isMemberOneOfTheRoles = false;
+              roleIds.forEach((role) => {
+                if (guildMember.roles.cache.has(role)) {
+                  isMemberOneOfTheRoles = true;
+                }
+              });
               // tslint:disable-next-line:no-console
               console.log(
-                'Guild Member ROLES',
-                guildMember.roles.cache.values(),
+                'Does the member have one of the roles specified?',
+                isMemberOneOfTheRoles,
               );
-              msg.payload = Flatted.parse(
-                Flatted.stringify(
-                  guildMember.roles.cache.get('696073400338350081') as Role,
-                ),
-              );
+              const roles: string[] = [];
+              guildMember.roles.cache.forEach((role) => {
+                roles.push(Flatted.parse(Flatted.stringify(role as Role)));
+              });
+              msg.payload = Flatted.parse(Flatted.stringify(roles));
               node.send(msg);
             });
-            // if (guild) {
-            //   msg.payload = Flatted.parse(Flatted.stringify(guildMember));
-            //   node.send(msg);
-            // } else {
-            //   msg.payload = 'NULL GUILD';
-            //   node.send(msg);
-            // }
-            // node.send(Flatted.parse(Flatted.stringify(guild.members.cache.get(userId))));
-            // let isMod = 'false';
-            // roleIds.forEach((role) => {
-            //   if (guild.members.cache.get(userId)!.roles.cache.has(role)) {
-            //     this.debug('User matches one of the roles!');
-            //     isMod = 'true';
-            //   }
-            // });
-            // node.send(Flatted.parse(Flatted.stringify(guild.members)));
-            // const guildMemberResolvable = (guild.members.resolve('639178210235514900') as GuildMemberResolvable);
-            // const guildMember = (guild.members.resolve(guildMemberResolvable) as GuildMember);
             if (done) {
               done();
             }

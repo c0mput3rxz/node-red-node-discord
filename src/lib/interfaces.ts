@@ -62,6 +62,11 @@ export interface IMessage {
   payload: string;
 }
 
+export interface IMessageWithUserId {
+  payload: string;
+  topic: string;
+}
+
 export interface IFile {
   filename: string;
   href: string;
